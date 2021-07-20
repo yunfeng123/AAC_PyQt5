@@ -10,7 +10,7 @@ from datetime import datetime
 from PyQt5.QtWidgets import *
 
 
-def run_pic(main_frame):
+def run_pic(filepath_csv, ):
     dt = datetime.now()
     now_date = dt.strftime('%Y%m%d')
     overdue_date = '20230704'
@@ -31,7 +31,7 @@ def run_pic(main_frame):
     boxplot_X_name = []
 
     # 创建保存图片的文件夹
-    filepath_csv = main_frame.text_CSV.text()
+
     pic_dic = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo' + '/'
     pic_dic_0 = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo'
     isExists = os.path.exists(pic_dic)
