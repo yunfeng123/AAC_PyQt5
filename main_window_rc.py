@@ -14,7 +14,9 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
+        #MainWindow.setWindowFlags(QtCore.Qt.WindowMinimizeButtonHint)
         MainWindow.resize(680, 408)
+        MainWindow.setFixedSize(MainWindow.width(), MainWindow.height())
         font = QtGui.QFont()
         font.setFamily("Arial")
         MainWindow.setFont(font)
