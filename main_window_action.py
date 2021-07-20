@@ -1,6 +1,20 @@
+import threading
+import time
+from datetime import datetime
+import pandas as pd
+import csv_process
+import Histogram
+import Boxplot
+import Sweep_1 as Sweep
+import os
+import xlwings as xw
+
 import main_window_rc as mw
 from PyQt5.QtWidgets import *
+from PyQt5 import QtWidgets, QtCore
+from PyQt5.QtCore import *
 import run_pic
+import run_report
 
 
 class mainwindow_action(mw.Ui_MainWindow):
@@ -9,7 +23,9 @@ class mainwindow_action(mw.Ui_MainWindow):
         self.btn_ini.clicked.connect(self.openfile_ini)
         self.btn_CSV.clicked.connect(self.openfile_csv)
         self.btn_pic.clicked.connect(self.opendir_pic)
-        self.btn_run.clicked.connect(self.run)
+        self.btn_run.clicked.connect(self.run_pic)
+        self.btn_report.clicked.connect(self.run_report)
+
 
     def openfile_ini(self):
         file_name, file_type = QFileDialog.getOpenFileName(caption='配置文件', filter="xlsx Files (*.xlsx);;All Files (*)")
@@ -23,5 +39,12 @@ class mainwindow_action(mw.Ui_MainWindow):
         file_path = QFileDialog.getExistingDirectory(caption='图片目录')
         self.text_pic.setText(file_path)
 
-    def run(self):
-        run_pic.run(self)
+
+    def run_pic(self):
+        run_pic.run_pic(self)
+
+
+    def run_report(self):
+        run_report.run_report(self)
+
+

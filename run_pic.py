@@ -1,5 +1,4 @@
 import pandas as pd
-
 import xlwings as xw
 import csv_process
 import Histogram
@@ -7,23 +6,20 @@ import Boxplot
 import Sweep_1 as Sweep
 import time
 import os
-import datetime
+from datetime import datetime
+from PyQt5.QtWidgets import *
 
 
-def run(self):
-    dt = datetime.datetime.now()
+def run_pic(main_frame):
+    dt = datetime.now()
     now_date = dt.strftime('%Y%m%d')
     overdue_date = '20230704'
-
     time_t0 = time.time()
-    text_info_line = 2  # 监控text_info已经输入到第几行
-    self.text_info.clear()
-    self.text_info.append('Start -> Reading CSV File' + '\n')
-    self.text_info.update()
-    data_csv, USL, LSL, Overlay, Station, project = csv_process.csv_process(self.text_CSV.text())
-
-    config_name = self.entry_config.text()
-    data_ini = pd.read_excel(self.text_ini.text(), sheet_name=Station)
+    main_frame.text_info.clear()
+    main_frame.text_info.append('Start -> Reading CSV File')
+    data_csv, USL, LSL, Overlay, Station, project = csv_process.csv_process(main_frame.text_CSV.text())
+    config_name = main_frame.entry_config.text()
+    data_ini = pd.read_excel(main_frame.text_ini.text(), sheet_name=Station)
 
     graph_flag = ''  # 画什么图
     graph_class = ''  # 图的分类标签
@@ -34,16 +30,14 @@ def run(self):
     LSL_tem = []
     boxplot_X_name = []
 
-    print_info = ''  # 显示打印信息
-
     # 创建保存图片的文件夹
-    filepath_csv = self.text_CSV.text()
+    filepath_csv = main_frame.text_CSV.text()
     pic_dic = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo' + '/'
     pic_dic_0 = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo'
     isExists = os.path.exists(pic_dic)
     if not isExists:
         os.makedirs(pic_dic)
-    self.text_pic.setText(pic_dic_0)
+    main_frame.text_pic.setText(pic_dic_0)
 
     out_data = pd.DataFrame(index=['Item', 'USL', 'LSL', 'Mean', 'STDEV', 'CPK'])  # 输出数据表格
 
@@ -84,14 +78,12 @@ def run(self):
                                                           USL_histogram, LSL_histogram, data_csv[item_name],
                                                           data_ini.loc[i, 'Axis Upper Limit'],
                                                           data_ini.loc[i, 'Axis Lower Limit'], ini_pic_order,
-                                                          self.entry_qty.text())
+                                                          main_frame.entry_qty.text())
                 out_data = pd.concat([out_data, out_his], axis=1)
-                self.text_info.append(print_info + '\n')
-                self.cursot = self.text_info.textCursor()
-                self.text_info.moveCursor(self.cursot.End)
-                # self.text_info.see(END)
-                text_info_line = text_info_line + 1
-                self.text_info.update()
+                main_frame.text_info.append(print_info)
+                main_frame.cursot = main_frame.text_info.textCursor()
+                main_frame.text_info.moveCursor(main_frame.cursot.End)
+                QApplication.processEvents()
 
             elif graph_flag == 'Boxplot' and data_ini.loc[i, 'Monitor'] == data_ini.loc[i, 'Monitor']:  # Monitor列判定是否画图
 
@@ -116,15 +108,13 @@ def run(self):
                     print_info, out_box = Boxplot.Boxplot(Station, pic_dic, config_name, graph_class, USL_tem, LSL_tem,
                                                           boxplot_data_tem, data_ini.loc[i, 'Axis Upper Limit'],
                                                           data_ini.loc[i, 'Axis Lower Limit'], boxplot_X_name,
-                                                          ini_pic_order, self.entry_qty.text())
+                                                          ini_pic_order, main_frame.entry_qty.text())
                     boxplot_X_name = []
                     out_data = pd.concat([out_data, out_box], axis=1)
-                    self.text_info.append(print_info + '\n')
-                    text_info_line = text_info_line + 1
-                    self.cursot = self.text_info.textCursor()
-                    self.text_info.moveCursor(self.cursot.End)
-                    # self.text_info.see(END)
-                    self.text_info.update()
+                    main_frame.text_info.append(print_info)
+                    main_frame.cursot = main_frame.text_info.textCursor()
+                    main_frame.text_info.moveCursor(main_frame.cursot.End)
+                    QApplication.processEvents()
                     boxplot_data_tem = pd.DataFrame()
                     USL_tem = []
                     LSL_tem = []
@@ -137,26 +127,18 @@ def run(self):
                         LSL_tem.append(LSL[j])
                 print_info = Sweep.Sweep(Station, pic_dic, config_name, graph_class, USL_tem, LSL_tem, sweep_data_tem,
                                          data_ini.loc[i, 'Axis Upper Limit'], data_ini.loc[i, 'Axis Lower Limit'],
-                                         ini_pic_order, self.entry_qty.text())
-                self.text_info.append(print_info + '\n')
-                text_info_line = text_info_line + 1
-                # self.text_info.see(END)
-                self.cursot = self.text_info.textCursor()
-                self.text_info.moveCursor(self.cursot.End)
-                self.text_info.update()
+                                         ini_pic_order, main_frame.entry_qty.text())
+                main_frame.text_info.append(print_info)
+                main_frame.cursot = main_frame.text_info.textCursor()
+                main_frame.text_info.moveCursor(main_frame.cursot.End)
+                QApplication.processEvents()
                 sweep_data_tem = pd.DataFrame()
                 USL_tem = []
                 LSL_tem = []
 
         else:
-            print_info = f'Error -> {item_name} IS not Found on Data !'
-            self.text_info.append(print_info + '\n')
-            self.text_info.tag_add('tag0', str(text_info_line) + '.9',
-                                   str(text_info_line) + '.' + str(9 + len(item_name)))  # Error 打印突出显示
-            self.text_info.tag_config('tag0', background='red', font=('Times'))
-            text_info_line = text_info_line + 1
-            # self.text_info.see(END)
-            self.text_info.update()
+            print_info = '<span style="background:red;">' + f'Error -> {item_name} IS not Found on Data !' + '</span>'
+            main_frame.text_info.append(print_info)
 
     # 保存数据到Excel Table
     save_table_name = project + '_' + Station + f'_Summary Table_{now_date}.xlsx'
@@ -165,25 +147,31 @@ def run(self):
     if os.path.exists(out_data_path):
         wb = app.books.open(out_data_path)
         for i in wb.sheets:
-            if i.name == self.entry_config.get():
-                wb.sheets[self.entry_config.get()].delete()
-        ws = wb.sheets.add(self.entry_config.get())
-        ws.range('A1').expand('table').value = out_data
-        ws.range('A1').api.EntireRow.Delete()
+            if i.name == main_frame.entry_config.text():
+                wb.sheets[main_frame.entry_config.text()].delete()
+                break
+        if main_frame.entry_config.text() == '':
+            ws = wb.sheets.add()
+        else:
+            ws = wb.sheets.add(main_frame.entry_config.text())
     else:
-        wb = app.books.add()
-        wb.sheets[0].name = self.entry_config.text()
-        ws = wb.sheets[0]
-        ws.range('A1').expand('table').value = out_data
-        ws.range('A1').api.EntireRow.Delete()
+        if main_frame.entry_config.text() == '':
+            wb = app.books.add()
+            ws = wb.sheets[0]
+        else:
+            wb = app.books.add()
+            ws = wb.sheets[0]
+            ws.name = main_frame.entry_config.text()
+
+    ws.range('A1').expand('table').value = out_data
+    ws.range('A1').api.EntireRow.Delete()
     wb.save(out_data_path)
     wb.close()
     app.quit()
 
     time_delta = time.time() - time_t0
-    self.text_info.append('Finished All in ' + str(round(time_delta, 1)) + ' Seconds' + '\n')
-    self.text_info.tag_add('tag', str(text_info_line) + '.0', str(text_info_line + 1) + '.0')  # Finish 打印突出显示
-    self.text_info.tag_config('tag', background='green', font=('Times', 15))
-    # self.text_info.see(END)
-    self.text_info.update()
-    text_info_line = text_info_line + 1
+
+    print_info = '<span style="background:green;">' + 'Finished All in ' + str(
+        round(time_delta, 1)) + ' Seconds' + '</span>'
+    main_frame.text_info.append(print_info)
+    main_frame.text_info.repaint()
