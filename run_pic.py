@@ -10,16 +10,14 @@ from datetime import datetime
 from PyQt5.QtWidgets import *
 
 
-def run_pic(filepath_csv, ):
+def run_pic(filepath_csv, filepath_ini, config, qty):
     dt = datetime.now()
     now_date = dt.strftime('%Y%m%d')
-    overdue_date = '20230704'
     time_t0 = time.time()
-    main_frame.text_info.clear()
-    main_frame.text_info.append('Start -> Reading CSV File')
-    data_csv, USL, LSL, Overlay, Station, project = csv_process.csv_process(main_frame.text_CSV.text())
-    config_name = main_frame.entry_config.text()
-    data_ini = pd.read_excel(main_frame.text_ini.text(), sheet_name=Station)
+    print_info = ('Start -> Reading CSV File')
+    data_csv, USL, LSL, Overlay, Station, project = csv_process.csv_process(filepath_csv)
+    config_name = config
+    data_ini = pd.read_excel(filepath_ini, sheet_name=Station)
 
     graph_flag = ''  # 画什么图
     graph_class = ''  # 图的分类标签
@@ -33,11 +31,11 @@ def run_pic(filepath_csv, ):
     # 创建保存图片的文件夹
 
     pic_dic = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo' + '/'
-    pic_dic_0 = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo'
-    isExists = os.path.exists(pic_dic)
-    if not isExists:
-        os.makedirs(pic_dic)
-    main_frame.text_pic.setText(pic_dic_0)
+    # pic_dic_0 = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo'
+    # isExists = os.path.exists(pic_dic)
+    # if not isExists:
+    #     os.makedirs(pic_dic)
+    # main_frame.text_pic.setText(pic_dic_0)
 
     out_data = pd.DataFrame(index=['Item', 'USL', 'LSL', 'Mean', 'STDEV', 'CPK'])  # 输出数据表格
 
@@ -78,12 +76,12 @@ def run_pic(filepath_csv, ):
                                                           USL_histogram, LSL_histogram, data_csv[item_name],
                                                           data_ini.loc[i, 'Axis Upper Limit'],
                                                           data_ini.loc[i, 'Axis Lower Limit'], ini_pic_order,
-                                                          main_frame.entry_qty.text())
+                                                          qty)
                 out_data = pd.concat([out_data, out_his], axis=1)
-                main_frame.text_info.append(print_info)
-                main_frame.cursot = main_frame.text_info.textCursor()
-                main_frame.text_info.moveCursor(main_frame.cursot.End)
-                QApplication.processEvents()
+                # main_frame.text_info.append(print_info)
+                # main_frame.cursot = main_frame.text_info.textCursor()
+                # main_frame.text_info.moveCursor(main_frame.cursot.End)
+                # QApplication.processEvents()
 
             elif graph_flag == 'Boxplot' and data_ini.loc[i, 'Monitor'] == data_ini.loc[i, 'Monitor']:  # Monitor列判定是否画图
 
@@ -108,12 +106,12 @@ def run_pic(filepath_csv, ):
                     print_info, out_box = Boxplot.Boxplot(Station, pic_dic, config_name, graph_class, USL_tem, LSL_tem,
                                                           boxplot_data_tem, data_ini.loc[i, 'Axis Upper Limit'],
                                                           data_ini.loc[i, 'Axis Lower Limit'], boxplot_X_name,
-                                                          ini_pic_order, main_frame.entry_qty.text())
+                                                          ini_pic_order, qty)
                     boxplot_X_name = []
                     out_data = pd.concat([out_data, out_box], axis=1)
-                    main_frame.text_info.append(print_info)
-                    main_frame.cursot = main_frame.text_info.textCursor()
-                    main_frame.text_info.moveCursor(main_frame.cursot.End)
+                    # main_frame.text_info.append(print_info)
+                    # main_frame.cursot = main_frame.text_info.textCursor()
+                    # main_frame.text_info.moveCursor(main_frame.cursot.End)
                     QApplication.processEvents()
                     boxplot_data_tem = pd.DataFrame()
                     USL_tem = []
@@ -127,10 +125,10 @@ def run_pic(filepath_csv, ):
                         LSL_tem.append(LSL[j])
                 print_info = Sweep.Sweep(Station, pic_dic, config_name, graph_class, USL_tem, LSL_tem, sweep_data_tem,
                                          data_ini.loc[i, 'Axis Upper Limit'], data_ini.loc[i, 'Axis Lower Limit'],
-                                         ini_pic_order, main_frame.entry_qty.text())
-                main_frame.text_info.append(print_info)
-                main_frame.cursot = main_frame.text_info.textCursor()
-                main_frame.text_info.moveCursor(main_frame.cursot.End)
+                                         ini_pic_order, qty)
+                # main_frame.text_info.append(print_info)
+                # main_frame.cursot = main_frame.text_info.textCursor()
+                # main_frame.text_info.moveCursor(main_frame.cursot.End)
                 QApplication.processEvents()
                 sweep_data_tem = pd.DataFrame()
                 USL_tem = []
@@ -138,7 +136,6 @@ def run_pic(filepath_csv, ):
 
         else:
             print_info = '<span style="background:red;">' + f'Error -> {item_name} IS not Found on Data !' + '</span>'
-            main_frame.text_info.append(print_info)
 
     # 保存数据到Excel Table
     save_table_name = project + '_' + Station + f'_Summary Table_{now_date}.xlsx'
@@ -147,21 +144,21 @@ def run_pic(filepath_csv, ):
     if os.path.exists(out_data_path):
         wb = app.books.open(out_data_path)
         for i in wb.sheets:
-            if i.name == main_frame.entry_config.text():
-                wb.sheets[main_frame.entry_config.text()].delete()
+            if i.name == config:
+                wb.sheets[config].delete()
                 break
-        if main_frame.entry_config.text() == '':
+        if config == '':
             ws = wb.sheets.add()
         else:
-            ws = wb.sheets.add(main_frame.entry_config.text())
+            ws = wb.sheets.add(config.text())
     else:
-        if main_frame.entry_config.text() == '':
+        if config == '':
             wb = app.books.add()
             ws = wb.sheets[0]
         else:
             wb = app.books.add()
             ws = wb.sheets[0]
-            ws.name = main_frame.entry_config.text()
+            ws.name = config
 
     ws.range('A1').expand('table').value = out_data
     ws.range('A1').api.EntireRow.Delete()
@@ -173,5 +170,4 @@ def run_pic(filepath_csv, ):
 
     print_info = '<span style="background:green;">' + 'Finished All in ' + str(
         round(time_delta, 1)) + ' Seconds' + '</span>'
-    main_frame.text_info.append(print_info)
-    main_frame.text_info.repaint()
+
