@@ -1,6 +1,5 @@
 import pandas as pd
 
-# 行标签为Config，列标签为Item_Name
 
 def csv_process(csv_path):
     data_raw = pd.read_csv(csv_path, delimiter=',', skiprows=1, low_memory=False)
@@ -8,7 +7,7 @@ def csv_process(csv_path):
     USL = data_raw.iloc[2]
     LSL = data_raw.iloc[3]
 
-    # Delete Fail Iitems
+    # Delete Fail Items
 
     if 'ALERT_CFG' in data_raw.index:
         config_flag = 0

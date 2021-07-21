@@ -3,7 +3,7 @@ from PyQt5.QtCore import *
 from datetime import datetime
 import time
 import pandas as pd
-import csv_process
+import big_file_read
 import Histogram
 import Boxplot
 import Sweep_1 as Sweep
@@ -30,7 +30,7 @@ class Thread(QThread):
         time_t0 = time.time()
         print_info = ('Start -> Reading CSV File')
         self.show_signal.emit(print_info)
-        data_csv, USL, LSL, Overlay, Station, project = csv_process.csv_process(self.filepath_csv)
+        data_csv, USL, LSL, Overlay, Station, project = big_file_read.csv_process(self.filepath_csv)
         config_name = self.config
         data_ini = pd.read_excel(self.filepath_ini, sheet_name=Station)
 
@@ -46,11 +46,6 @@ class Thread(QThread):
         # 创建保存图片的文件夹
 
         pic_dic = os.path.split(self.filepath_csv)[0] + '/' + 'Saved Photo' + '/'
-        # pic_dic_0 = os.path.split(filepath_csv)[0] + '/' + 'Saved Photo'
-        # isExists = os.path.exists(pic_dic)
-        # if not isExists:
-        #     os.makedirs(pic_dic)
-        # main_frame.text_pic.setText(pic_dic_0)
 
         out_data = pd.DataFrame(index=['Item', 'USL', 'LSL', 'Mean', 'STDEV', 'CPK'])  # 输出数据表格
 
@@ -129,10 +124,6 @@ class Thread(QThread):
                         boxplot_X_name = []
                         out_data = pd.concat([out_data, out_box], axis=1)
                         self.show_signal.emit(print_info)
-                        # main_frame.text_info.append(print_info)
-                        # main_frame.cursot = main_frame.text_info.textCursor()
-                        # main_frame.text_info.moveCursor(main_frame.cursot.End)
-                        # QApplication.processEvents()
                         boxplot_data_tem = pd.DataFrame()
                         USL_tem = []
                         LSL_tem = []
@@ -149,10 +140,7 @@ class Thread(QThread):
                                              data_ini.loc[i, 'Axis Upper Limit'], data_ini.loc[i, 'Axis Lower Limit'],
                                              ini_pic_order, self.qty)
                     self.show_signal.emit(print_info)
-                    # main_frame.text_info.append(print_info)
-                    # main_frame.cursot = main_frame.text_info.textCursor()
-                    # main_frame.text_info.moveCursor(main_frame.cursot.End)
-                    # QApplication.processEvents()
+
                     sweep_data_tem = pd.DataFrame()
                     USL_tem = []
                     LSL_tem = []
